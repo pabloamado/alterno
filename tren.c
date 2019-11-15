@@ -23,12 +23,19 @@ void escribirMensaje(int sockTren,ST_TREN * tren) {
                 printf("Modelo:%s\n",tren->idTren);
                 printf("Origen:%s\n",tren->estacionOrigen);
                 printf("Destino:%s\n",tren->estacionDestino);
-                printf("Cant de pasajeros:%d\n",tren->pasajeros);
+                printf("Cant de pasajeros:%s\n",tren->pasajeros);
                 printf("Litros de combustible:%d\n",tren->combustible);
                 printf("tiempo de viaje restante:%d\n",tren->tViaje);
                 printf("Estado:%s\n",tren->estado); // en transito, en anden, en estacion
                 printf("Motivo:%s\n",tren->motivo); // paso o anden
           } 
+		if ((strncmp(mensaje, "enviar tren", 4)) == 0) { 
+                printf("El tren se  esta poniendo en marcha.\n"); 
+		        enviarTren(tren, sockTren);
+
+            break; 
+        }
+
             if ((strncmp(mensaje, "exit", 4)) == 0) { 
             printf("te desconectaste.\n"); 
             break; 
@@ -44,27 +51,28 @@ void escribirMensaje(int sockTren,ST_TREN * tren) {
 } 
   
 int main(int argc, char * argv[]) { 
+ 	int sockTren; 
+    ST_TREN tren;
+    createTren(&tren);
     FILE * config=NULL;
-    char * linea=(char*)malloc(sizeof(char)*MAX);
+    struct sockaddr_in estacionAddr; 
+    char * linea=(char*)malloc(sizeof (char) *MAX);
     memset(linea,'\0',MAX);
+
     config=fopen(argv[1],"r");
 
-    if(config==NULL){
-        printf("fallo la apertura");
-        exit(EXIT_FAILURE);
+    if(config!=NULL){
+        printf("se abrio el archivo\n");    
     } else{
-        printf("se abrio el archivo\n");
-        }
-        while(fgets(linea,37+1,config)!=NULL){
-            
-              
-        }
-    ST_TREN tren;
-   // createTren(&tren);
+        exit(EXIT_FAILURE);
+    }
     
-    int sockTren; 
-    struct sockaddr_in estacionAddr; 
-  
+    fgets(linea,MAX,config);
+    
+    cargarTren(linea,&tren);
+       
+    memset(linea,'\0',MAX);
+   
     // se crea el socket
     sockTren = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockTren == -1) { 
@@ -73,7 +81,7 @@ int main(int argc, char * argv[]) {
     } 
     else
         printf("Se creo el tren..\n"); 
-    bzero(&estacionAddr, sizeof(estacionAddr)); 
+        bzero(&estacionAddr, sizeof(estacionAddr)); 
   
     // se asigna la ip y el puerto a usar
     estacionAddr.sin_family = AF_INET; 
